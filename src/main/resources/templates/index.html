@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pelanggan Manajemen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body>
+  
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+	  <div class="container">
+	    <a class="navbar-brand" href="/"><strong>Desain Grafis Web</strong></a>
+	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+	      <span class="navbar-toggler-icon"></span>
+	    </button>
+	    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+	      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+	        <li class="nav-item">
+	          <a class="nav-link text-dark" href="/">Home</a>
+	        </li>
+	        <li class="nav-item">
+	          <a class="nav-link text-dark" href="/contact">Contact</a>
+	        </li>
+	        
+	        <li class="nav-item">
+	          <a class="nav-link text-dark" href="/user">User</a>
+	        </li>
+	        <li class="nav-item">
+	          <a class="nav-link text-dark" href="/client">Client</a>
+	        </li>
+	        <li class="nav-item">
+	          <a class="nav-link text-dark" href="/admin">Admin</a>
+	        </li>
+	        
+	        
+	      </ul>
+	      
+	      
+	      <ul class="navbar-nav me-3" sec:authorize="hasRole('admin')">
+	        <li class="nav-item dropdown">
+	          <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+	            Admin
+	          </a>
+	          <ul class="dropdown-menu">
+	            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+	            <li><a class="dropdown-item" href="/">Home</a></li>
+	          </ul>
+	        </li>
+	      </ul>
+	      
+	      
+	      <ul class="navbar-nav me-3" sec:authorize="hasRole('client')">
+	        <li class="nav-item dropdown">
+	          <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+	            Client
+	          </a>
+	          <ul class="dropdown-menu">
+	            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+	            <li><a class="dropdown-item" href="/">Home</a></li>
+	          </ul>
+	        </li>
+	      </ul>
+	      
+	      <form sec:authorize="isAuthenticated()" method="post" action="/logout">
+	          <input type="hidden" th:name="${_csrf.parameterName}" 
+					th:value="${_csrf.token}" />
+  		
+	          <button type="submit" class="btn btn-danger">
+	          	Logout
+	          </button>
+          </form>
+	      
+	      <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+	        <li class="nav-item">
+                <a href="/register" class="btn btn-outline-primary me-2">Register</a>
+            </li>
+            <li class="nav-item">
+                <a href="/login" class="btn btn-primary">Login</a>
+            </li>
+	      </ul>
+	      
+	    </div>
+	  </div>
+	</nav>
+  
+    
+    <div class="container my-4">
+		<h1 class="text-center mb-3">Daftar Pelanggan</h1>
+		<a class="btn btn-primary" href="/clients/create">Pelanggan Baru</a>
+    
+		<table class="table">
+		<thead>
+		  <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Nomor Handphone</th>
+            <th>Alamat</th>
+            <th>Status</th>
+            <th>Dibuat</th>
+            <th>Aksi</th>
+		  </tr>
+		</thead>
+		<tbody class="table-group-divider">
+		  <tr th:each="client : ${clients}">
+		      <td th:text="${client.id}"></td>
+		      <td th:text="@{${client.firstName} + ' ' + ${client.lastName}}"></td>
+		      <td th:text="${client.email}"></td>
+		      <td th:text="${client.nomorhp}"></td>
+		      <td th:text="${client.alamat}"></td>
+		      
+		      <td>
+		        <span th:if='${client.status.equals("Proses")}' class="badge text-bg-primary" th:text="${client.status}"></span>
+		        <span th:if='${client.status.equals("Persetujuan")}' class="badge text-bg-warning" th:text="${client.status}"></span>
+		        <span th:if='${client.status.equals("Selesai")}' class="badge text-bg-success" th:text="${client.status}"></span>
+		        <span th:if='${client.status.equals("Batal")}' class="badge text-bg-danger" th:text="${client.status}"></span>
+		        
+		      </td>
+		      
+		      <td th:text="${client.createdAt.toString().substring(0, 10)}"></td>
+		      
+		      <td style="white-space:nowrap">
+	               <a class="btn btn-primary btn-sm" 
+	               		th:href="@{/clients/details(id=${client.id})}">
+	               		<i class="bi bi-search"></i>
+	               </a> 
+	               <a class="btn btn-primary btn-sm" 
+	               		th:href="@{/clients/edit(id=${client.id})}">
+	               		<i class="bi bi-pencil"></i>
+	               </a>
+	               <a class="btn btn-danger btn-sm" 
+	               		th:href="@{/clients/delete(id=${client.id})}"
+	               		onclick="return confirm('Apakah Anda Yakin?')">
+	               		<i class="bi bi-trash3"></i>
+	               </a>
+	          </td>
+		  </tr>
+		</tbody>
+	  </table>
+    </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
